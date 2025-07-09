@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    'igdb' => [
+        'base_url'      => env('IGDB_BASE_URL', 'https://api.igdb.com/v4'),
+        'auth_url'      => env('IGDB_AUTH_URL', 'https://id.twitch.tv/oauth2'),
+        'client_id'     => env('IGDB_CLIENT_ID'),
+        'client_secret' => env('IGDB_CLIENT_SECRET'),
+    ],
+
 ];
