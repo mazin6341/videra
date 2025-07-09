@@ -1,0 +1,62 @@
+services:
+  laravel:
+    container_name: videra
+    build:
+      context: .
+      dockerfile: .docker/Dockerfile
+      args:
+        - DEBUG=true
+    tty: true
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./src:/var/www/html
+      - ./.docker/devel.env:/var/www/html/.env
+      - ./.docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini:ro
+      - ./.docker/php/entrypoint.sh:/docker-entrypoint.sh:z
+    env_file:
+      - ./.docker/devel.env
+    environment:
+      SERVICE_NAME: app
+      SERVICE_TAGS: dev
+    expose:
+      - 9000
+    entrypoint: /bin/bash /docker-entrypoint.sh
+    networks:
+      - videra_network
+
+  nginx:
+    container_name: videra_nginx
+    image: nginx:alpine
+    tty: true
+    ports:
+      - 7098:80
+    volumes:
+      - ./src:/var/www/html
+      - ./.docker/devel.env:/var/www/html/.env
+      - ./.docker/nginx/conf.d/:/etc/nginx/conf.d/
+    networks:
+      - videra_network
+
+  database:
+    container_name: videra_db
+    image: postgres:latest
+    tty: true
+    environment:
+      POSTGRES_DB: laravel
+      POSTGRES_USER: laravel
+      POSTGRES_PASSWORD: secret
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+    networks:
+      - videra_network
+    ports:
+      - 5435:5432
+    
+volumes:
+  dbdata:
+    driver: local
+
+networks:
+  videra_network:
+    driver: bridge
